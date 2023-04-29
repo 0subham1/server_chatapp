@@ -1,12 +1,6 @@
 const express = require("express");
-const app = express();
 const router = express.Router();
-
-const cors = require("cors");
-app.use(cors());
-app.use(express.json());
-
-const users=require("../db/userModel")
+const users = require("../db/userModel");
 
 router.post("/signup", async (req, res) => {
   let obj = {
@@ -17,8 +11,7 @@ router.post("/signup", async (req, res) => {
   res.send(result);
 });
 router.get("/", async (req, res) => {
-    
-    res.send("world");
-  });
+  res.send("home page");
+});
 
-module.exports=router
+module.exports = router;
