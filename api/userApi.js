@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const users = require("../db/userModel");
-const cors = require("cors");
-const app=express()
-app.use(cors());
-app.use(express.json());
+
 router.post("/signup", async (req, res) => {
   let obj = {
     name: req.body.name,
