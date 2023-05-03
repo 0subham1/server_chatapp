@@ -7,7 +7,6 @@ app.use(cors());
 app.use(express.json());
 
 console.log("heelloo")
-app.use("",require("./api/userApi"))
-
+app.use(require("./api/userApi"))
 
 app.listen(4000)
