@@ -14,7 +14,7 @@ const uri = "mongodb+srv://0subhamgupta1:<password>@gamedevcluster.nxytf9k.mongo
 You will get this path to connect backend to atlasDB
 
 const DB_URL="mongodb+srv://eCommerce:eCommerce@cluster0.3wz3tca.mongodb.net/e_comm?retryWrites=true&w=majority"
-
+(...mongodb.net/e_comm?retry... ) here e_comm is database name
 mongodb+srv://0subhamgupta1:subham12@gamedevcluster.nxytf9k.mongodb.net/?retryWrites=true&w=majority
 
 
