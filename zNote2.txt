@@ -1,0 +1,58 @@
+Project Deployment Basic
+
+React node mongo vercel
+
+@mongo atlas
+1 Create project > New database> security> 
+Add username > add ip 0.0.0.0 for all
+Ex: eCommerce 0subhamgupta1 
+2 add cluster
+3 add DB and collection name
+4 deployment> database>connect>drivers
+
+const uri = "mongodb+srv://0subhamgupta1:<password>@gamedevcluster.nxytf9k.mongodb.net/?retryWrites=true&w=majority";
+You will get this path to connect backend to atlasDB
+
+const DB_URL="mongodb+srv://eCommerce:eCommerce@cluster0.3wz3tca.mongodb.net/e_comm?retryWrites=true&w=majority"
+
+mongodb+srv://0subhamgupta1:subham12@gamedevcluster.nxytf9k.mongodb.net/?retryWrites=true&w=majority
+
+
+@ GIT
+>set up folder and commit
+> publish
+>GitHub wants to signIn using Github extension
+>will redirect to browser 
+>signIn github
+>will ask to authorize for vscode
+>will ask to publish private /public 
+>DONE
+
+
+@ node
+npm init >creates package.json file
+npm i express mongoose cors
+
+
+@ DEPLOYMENT
+copy paste vercel.json file
+>upload to git
+> goto vercel.com
+>add new
+>search the project
+>deploy
+>look at the overview
+copy the URL paste it in const.js of frontend
+
+
+
+ISSUES
+@Router.use() requires a middleware function but got a Object
+: at bottom > module.exports = router 
+
+@Your repository has no remotes configured to push to
+: commit >addRemote> you’ll get publish option
+
+@CORS
+: app.use(cors()) in index.js file
+
