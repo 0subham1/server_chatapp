@@ -10,8 +10,6 @@ router.post("/signup", async (req, res) => {
   let result = await users.create(obj);
   res.send(result);
 });
-router.get("/", async (req, res) => {
-  res.send("home page");
-});
+
 
 module.exports = router;
