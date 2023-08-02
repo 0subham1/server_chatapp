@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const users = require("../modal/userModel");
+const users = require("../model/userModel");
 const errorHandler = require("../middleware/error");
 
 router.get("/users", async (req, res) => {
