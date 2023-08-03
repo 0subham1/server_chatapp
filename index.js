@@ -23,27 +23,34 @@ const Msg = require("./model/chatMsgModel");
 const errorHandler = require("./middleware/error");
 
 app.post("/signUp", async (req, res) => {
-  let obj = {
-    name: req.body.name,
-    phone: Number(req.body.phone),
-    password: req.body.password.toString(),
-    isAdmin: false,
-    createdAt: new Date(),
-  };
-  let exist = await User.findOne({ name: req.body.name });
-  console.log(exist, "exist");
-  if (exist) {
-    errorHandler(res, 403, "user Exists");
-  } else if (!obj.name) {
-    errorHandler(res, 400, "Please enter name");
-  } else if (!obj.phone || obj.phone.toString().length != 10) {
-    errorHandler(res, 400, "Please enter 10 digit phone");
-  } else if (!obj.password) {
-    errorHandler(res, 400, "Please enter password");
-  } else {
-    let result = await User.create(obj);
-    console.log(result, "result");
-    res.status(201).send({ success: true, message: "user created" });
+  try {
+    let obj = {
+      name: req.body.name,
+      phone: Number(req.body.phone),
+      password: req.body.password.toString(),
+      createdAt: new Date(),
+    };
+    let exist = await User.findOne({ name: req.body.name });
+    console.log(exist, "exist");
+    if (exist) {
+      errorHandler(res, 403, "user Exists");
+    } else if (!obj.name) {
+      errorHandler(res, 400, "Please enter name");
+    } else if (!obj.phone || obj.phone.toString().length != 5) {
+      errorHandler(res, 400, "Please enter 5 digit phone");
+    } else if (!obj.password) {
+      errorHandler(res, 400, "Please enter password");
+    } else {
+      let result = await User.create(obj);
+      if (result) {
+        res.status(201).send({ success: true, message: "user created" });
+      } else {
+        errorHandler(res, 403, "user not created");
+      }
+    }
+  } catch (err) {
+    console.log(err, "err");
+    errorHandler(res, 500, "server err ");
   }
 });
 
@@ -53,53 +60,73 @@ const createAuth = (userId) => {
 };
 
 app.post("/signIn", async (req, res) => {
-  let result = await User.findOne({ name: req.body.name });
-  if (result && result.password == req.body.password) {
-    let auth = createAuth(result._id);
-    res.status(200).send({ result, auth });
-  } else {
-    errorHandler(res, 400, "incorrect name/password ");
+  try {
+    const { name, password } = req.body;
+
+    let result = await User.findOne({ name: name });
+    if (result && result.password == password) {
+      let auth = createAuth(result._id);
+      res
+        .status(200)
+        .send({ result, auth, success: true, message: "login success" });
+    } else {
+      errorHandler(res, 400, "incorrect name/password ");
+    }
+  } catch (err) {
+    console.log(err, "err");
+    errorHandler(res, 500, "server err ");
   }
 });
 
-app.post("/signIn2", (req, res) => {
-  User.findOne({ name: req.body.name })
-    .then((dbUser) => {
-      if (dbUser && dbUser.password == req.body.password) {
-        res.status(200).send({ dbUser, auth });
-      } else {
-        errorHandler(res, 400, "incorrect name/password ");
-      }
-    })
-    .catch((err) => {
-      errorHandler(res, 500, "server err");
-      console.log("err", err, "err");
-    });
-});
-
-app.get("/users", (req, res) => {
-  User.find()
-    .then((result) => {
-      res.status(200).send(result);
-    })
-    .catch((err) => {
-      console.log(err, "err");
-      errorHandler(res, 500, "server err");
-    });
+app.get("/users", async (req, res) => {
+  try {
+    let result = await User.find();
+    res.status(200).send({ result, success: true, message: "userList" });
+  } catch (err) {
+    console.log(err, "err");
+    errorHandler(res, 500, "server err ");
+  }
 });
 
 app.post("/request/send", async (req, res) => {
-  const { userId, receiverId } = req.body;
   try {
-    await User.findByIdAndUpdate(receiverId, {
-      $push: { recievedRequest: userId },
-    });
+    const { userId, clientId } = req.body;
+    let client = await User.findOne({ _id: clientId });
+    let exist = client?.frndRequest?.some((a) => a == userId);
+    console.log(exist, "exist");
+    if (!exist) {
+      // let result = await users.updateOne(req.params, { $set: req.body });
+      await User.findByIdAndUpdate(clientId, {
+        $push: { frndRequest: userId },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $push: { sentRequest: clientId },
+      });
+      res.status(200).send({ success: true, message: "request sent" });
+    } else {
+      errorHandler(res, 400, "request already sent ");
+    }
+  } catch (err) {
+    console.log(err, "err");
+    errorHandler(res, 500, "server err");
+  }
+});
 
-    await User.findByIdAndUpdate(userId, {
-      $push: { sentRequest: receiverId },
-    });
-
-    res.status(200).send({ success: true, message: "request sent" });
+app.post("/request/accept", async (req, res) => {
+  const { userId, clientId } = req.body;
+  try {
+    let user = await User.findOne({ _id: userId }); //me
+    let client = await User.findOne({ _id: clientId }); //him
+    console.log(user, client, " user client");
+    user.friends.push(clientId);
+    client.friends.push(userId);
+    
+    user.frndRequest = user.frndRequest.filter((a) => a != clientId);
+    client.sentRequest = client.sentRequest.filter((a) => a != userId);
+    
+    
+    console.log(user, client, " user client2");
+    res.status(200).send({ success: true, message: "request accepted" });
   } catch (err) {
     console.log(err, "err");
     errorHandler(res, 500, "server err");

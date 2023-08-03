@@ -13,7 +13,7 @@ const schema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  recievedRequest: [
+  frndRequest: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
