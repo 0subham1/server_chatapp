@@ -63,12 +63,12 @@ app.post("/signIn", async (req, res) => {
   try {
     const { name, password } = req.body;
 
-    let result = await User.findOne({ name: name });
-    if (result && result.password == password) {
-      let auth = createAuth(result._id);
+    let user = await User.findOne({ name: name });
+    if (user && user.password == password) {
+      let auth = createAuth(user._id);
       res
         .status(200)
-        .send({ result, auth, success: true, message: "login success" });
+        .send({ user, auth, success: true, message: "login success" });
     } else {
       errorHandler(res, 400, "incorrect name/password ");
     }
@@ -80,8 +80,18 @@ app.post("/signIn", async (req, res) => {
 
 app.get("/users", async (req, res) => {
   try {
-    let result = await User.find();
-    res.status(200).send({ result, success: true, message: "userList" });
+    let users = await User.find();
+    res.status(200).send({ users, success: true, message: "users" });
+  } catch (err) {
+    console.log(err, "err");
+    errorHandler(res, 500, "server err ");
+  }
+});
+
+app.get("/users/:_id", async (req, res) => {
+  try {
+    let user = await User.findOne(req.params);
+    res.status(200).send({ user, success: true, message: "users" });
   } catch (err) {
     console.log(err, "err");
     errorHandler(res, 500, "server err ");
@@ -120,11 +130,10 @@ app.post("/request/accept", async (req, res) => {
     console.log(user, client, " user client");
     user.friends.push(clientId);
     client.friends.push(userId);
-    
+
     user.frndRequest = user.frndRequest.filter((a) => a != clientId);
     client.sentRequest = client.sentRequest.filter((a) => a != userId);
-    
-    
+
     console.log(user, client, " user client2");
     res.status(200).send({ success: true, message: "request accepted" });
   } catch (err) {
