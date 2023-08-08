@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const localStrategy = require("passport-local").Strategy;
+const multer = require("multer");
 
 const app = express();
 const port = 8000;
@@ -136,6 +137,55 @@ app.post("/request/accept", async (req, res) => {
 
     console.log(user, client, " user client2");
     res.status(200).send({ success: true, message: "request accepted" });
+  } catch (err) {
+    console.log(err, "err");
+    errorHandler(res, 500, "server err");
+  }
+});
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "files/"); // Specify the desired destination folder
+  },
+  filename: function (req, file, cb) {
+    // Generate a unique filename for the uploaded file
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
+
+app.post("/msg", upload.single("imageFile"), async (req, res) => {
+  try {
+    const { userId, clientId, msgType, msg } = req.body;
+
+    const newMsg = new Msg({
+      userId,
+      clientId,
+      msgType,
+      msg,
+      timeStamp: new Date(),
+      imageUrl: msgType === "image",
+    });
+    console.log(newMsg, "newMsg");
+    await newMsg.save();
+    res.status(200).send({ success: true, message: "Msg sent!" });
+  } catch (err) {
+    console.log(err, "err");
+    errorHandler(res, 500, "server err1");
+  }
+});
+
+app.get("/msg/:userId/:clientId", async (req, res) => {
+  try {
+    const { userId, clientId } = req.params;
+    const messages = await Msg.findOne({
+      $or: [
+        { userId: userId, clientId: clientId },
+        { userId: clientId, clientId: userId },
+      ],
+    }).populate("userId", "_id name");
+    res.status(200).send({ messages, success: true, message: "Conversation" });
   } catch (err) {
     console.log(err, "err");
     errorHandler(res, 500, "server err");
