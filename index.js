@@ -27,18 +27,15 @@ app.post("/signUp", async (req, res) => {
   try {
     let obj = {
       name: req.body.name,
-      phone: Number(req.body.phone),
       password: req.body.password.toString(),
       createdAt: new Date(),
     };
     let exist = await User.findOne({ name: req.body.name });
-    console.log(exist, "exist");
+    console.log(exist, "userexist");
     if (exist) {
       errorHandler(res, 403, "user Exists");
     } else if (!obj.name) {
       errorHandler(res, 400, "Please enter name");
-    } else if (!obj.phone || obj.phone.toString().length != 5) {
-      errorHandler(res, 400, "Please enter 5 digit phone");
     } else if (!obj.password) {
       errorHandler(res, 400, "Please enter password");
     } else {
@@ -63,19 +60,20 @@ const createAuth = (userId) => {
 app.post("/signIn", async (req, res) => {
   try {
     const { name, password } = req.body;
-
     let user = await User.findOne({ name: name });
-    if (user && user.password == password) {
-      let auth = createAuth(user._id);
+    console.log(user,"user in back")
+    if (!user) return errorHandler(res, 400, "no user found");
+    if (user && user.password != password)
+      return errorHandler(res, 400, "wrong pass");
+
+    let auth = createAuth(user._id);
+    auth &&
       res
         .status(200)
         .send({ user, auth, success: true, message: "login success" });
-    } else {
-      errorHandler(res, 400, "incorrect name/password ");
-    }
   } catch (err) {
     console.log(err, "err");
-    errorHandler(res, 500, "server err ");
+    errorHandler(res, 500, "Incorrect Details");
   }
 });
 
@@ -157,15 +155,17 @@ const upload = multer({ storage: storage });
 
 app.post("/msg", upload.single("imageFile"), async (req, res) => {
   try {
+    console.log(req?.file?.path, "req.file.path");
     const { userId, clientId, msgType, msg } = req.body;
     let obj = {
       userId,
       clientId,
       msgType,
-      msg,
+      msg: msgType === "text" ? msg : "",
       timeStamp: new Date(),
-      imageUrl: msgType === "image",
+      imgUri: msgType === "image" ? req.file.path : null,
     };
+    console.log(obj, "obj");
     let result = await Msg.create(obj);
     console.log(result, "result");
     res.status(200).send({ success: true, message: "Msg sent!" });
@@ -178,16 +178,13 @@ app.post("/msg", upload.single("imageFile"), async (req, res) => {
 app.get("/msg/:userId/:clientId", async (req, res) => {
   try {
     const { userId, clientId } = req.params;
-    console.log(userId,clientId,"userId clientId")
-    console.log(req.params,"req.params")
     const messages = await Msg.find({
       $or: [
         { userId: userId, clientId: clientId },
         { userId: clientId, clientId: userId },
       ],
-    })
+    });
     // .populate("userId", "_id name");
-    console.log(messages,"messages")
     res.status(200).send({ messages, success: true, message: "Conversation" });
   } catch (err) {
     console.log(err, "err");

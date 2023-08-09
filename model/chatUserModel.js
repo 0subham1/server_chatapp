@@ -5,10 +5,6 @@ const schema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  phone: {
-    type: Number,
-    trim: true,
-  },
   password: {
     type: String,
     required: true,

@@ -14,7 +14,7 @@ const schema = new mongoose.Schema({
     enum: ["text", "image"],
   },
   msg: String,
-  imgUrl: String,
+  imgUri: String,
   timeStamp: {
     type: Date,
     default: Date.now,
