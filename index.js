@@ -33,17 +33,17 @@ app.post("/signUp", async (req, res) => {
     let exist = await User.findOne({ name: req.body.name });
     console.log(exist, "userexist");
     if (exist) {
-      errorHandler(res, 403, "user Exists");
+      errorHandler(res, 200, "user Exists");
     } else if (!obj.name) {
-      errorHandler(res, 400, "Please enter name");
+      errorHandler(res, 200, "Please enter name");
     } else if (!obj.password) {
-      errorHandler(res, 400, "Please enter password");
+      errorHandler(res, 200, "Please enter password");
     } else {
       let result = await User.create(obj);
       if (result) {
         res.status(201).send({ success: true, message: "user created" });
       } else {
-        errorHandler(res, 403, "user not created");
+        errorHandler(res, 200, "user not created");
       }
     }
   } catch (err) {
@@ -61,10 +61,9 @@ app.post("/signIn", async (req, res) => {
   try {
     const { name, password } = req.body;
     let user = await User.findOne({ name: name });
-    console.log(user,"user in back")
-    if (!user) return errorHandler(res, 400, "no user found");
+    if (!user) return errorHandler(res, 200, "no user found");
     if (user && user.password != password)
-      return errorHandler(res, 400, "wrong pass");
+      return errorHandler(res, 200, "wrong pass");
 
     let auth = createAuth(user._id);
     auth &&
@@ -113,7 +112,7 @@ app.post("/request/send", async (req, res) => {
       });
       res.status(200).send({ success: true, message: "request sent" });
     } else {
-      errorHandler(res, 400, "request already sent ");
+      errorHandler(res, 200, "request already sent ");
     }
   } catch (err) {
     console.log(err, "err");
