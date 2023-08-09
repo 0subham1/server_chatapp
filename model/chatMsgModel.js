@@ -5,13 +5,13 @@ const schema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  recieverId: {
+  clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
   msgType: {
     type: String,
-    // enum: ["text", "image"],
+    enum: ["text", "image"],
   },
   msg: String,
   imgUrl: String,

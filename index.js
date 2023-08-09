@@ -158,17 +158,16 @@ const upload = multer({ storage: storage });
 app.post("/msg", upload.single("imageFile"), async (req, res) => {
   try {
     const { userId, clientId, msgType, msg } = req.body;
-
-    const newMsg = new Msg({
+    let obj = {
       userId,
       clientId,
       msgType,
       msg,
       timeStamp: new Date(),
       imageUrl: msgType === "image",
-    });
-    console.log(newMsg, "newMsg");
-    await newMsg.save();
+    };
+    let result = await Msg.create(obj);
+    console.log(result, "result");
     res.status(200).send({ success: true, message: "Msg sent!" });
   } catch (err) {
     console.log(err, "err");
@@ -179,12 +178,16 @@ app.post("/msg", upload.single("imageFile"), async (req, res) => {
 app.get("/msg/:userId/:clientId", async (req, res) => {
   try {
     const { userId, clientId } = req.params;
-    const messages = await Msg.findOne({
+    console.log(userId,clientId,"userId clientId")
+    console.log(req.params,"req.params")
+    const messages = await Msg.find({
       $or: [
         { userId: userId, clientId: clientId },
         { userId: clientId, clientId: userId },
       ],
-    }).populate("userId", "_id name");
+    })
+    // .populate("userId", "_id name");
+    console.log(messages,"messages")
     res.status(200).send({ messages, success: true, message: "Conversation" });
   } catch (err) {
     console.log(err, "err");
